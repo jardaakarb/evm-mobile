@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#11233d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>EVM Project Control | Mobilní aplikace</title>
+<style>
+:root {
+  --navy: #11233d;
+  --navy2: #172f4d;
+  --navy-light: #233d5b;
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --ink: #1b2a3f;
+  --muted: #718097;
+  --line: #e5eaf2;
+  --blue: #2563eb;
+  --blue-light: #eaf1ff;
+  --green: #128264;
+  --green-bg: #e7f7f1;
+  --amber: #aa701a;
+  --amber-bg: #fff4df;
+  --red: #c44646;
+  --red-bg: #feeeee;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 4px 20px rgba(31,53,83,.06);
+  --shadow-sm: 0 2px 8px rgba(31,53,83,.04);
+  --bottom-bar-height: 64px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14.5px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; border: none; outline: none; }
+button:disabled { opacity: .52; cursor: not-allowed; }
+
+/* Backdrop for mobile drawer */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,35,61,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.sidebar-open .sidebar-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sidebar Drawer */
+aside {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 280px;
+  max-width: 82vw;
+  background: var(--navy);
+  color: #d3dfef;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px;
+  z-index: 100;
+  box-shadow: 10px 0 30px rgba(0,0,0,0.25);
+  transform: translateX(-100%);
+  transition: transform .28s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.sidebar-open aside { transform: translateX(0); }
+
+@media(min-width: 961px) {
+  aside { transform: translateX(0); box-shadow: none; }
+  .sidebar-backdrop { display: none !important; }
+  .shell { margin-left: 280px; }
+  .mobile-bottom-bar { display: none !important; }
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 0 6px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+}
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  font-size: 19px;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+}
+.brand-name { font-size: 17px; font-weight: 750; color: #fff; letter-spacing: -.35px; }
+.brand-sub { font-size: 10px; color: #91a6c2; text-transform: uppercase; letter-spacing: 1.1px; margin-top: 1px; }
+
+.close-drawer-btn {
+  display: none;
+  margin-left: auto;
+  background: rgba(255,255,255,0.08);
+  color: #cbd8e9;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+}
+@media(max-width: 960px) { .close-drawer-btn { display: grid; } }
+
+.nav-label {
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  color: #8499b5;
+  margin: 22px 10px 10px;
+  text-transform: uppercase;
+  font-weight: 750;
+}
+.nav-btn {
+  color: #cbd8e9;
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  padding: 13px 14px;
+  text-align: left;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 3px 0;
+  font-weight: 550;
+  font-size: 14px;
+  transition: all .15s ease;
+  width: 100%;
+}
+.nav-btn:hover, .nav-btn:active { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-weight: 650;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+}
+.nav-icon { width: 20px; text-align: center; font-size: 18px; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 16px 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  color: #8fa7c1;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Shell & Content Layout */
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header & Topbar */
+.topbar {
+  height: 62px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.layout-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.menu-hamb {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 19px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+@media(min-width: 961px) { .menu-hamb { display: none; } }
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-brand-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--blue);
+  color: white;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+.topbar-title {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: var(--ink);
+  letter-spacing: -.2px;
+}
+
+.crumb {
+  font-size: 12px;
+  color: var(--muted);
+}
+.crumb strong { color: var(--ink); }
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.search-wrap {
+  position: relative;
+}
+.top-search {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8fafd;
+  width: 220px;
+  padding: 8px 12px;
+  outline: none;
+  font-size: 14px;
+}
+.top-search:focus {
+  border-color: #9cbaff;
+  background: white;
+}
+@media(max-width: 960px) {
+  .crumb, .search-wrap, .demo-watermark { display: none; }
+}
+
+.role-badge-btn {
+  background: #eef4ff;
+  border: 1px solid #c7dcff;
+  color: #1e4785;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.role-badge-btn:hover { background: #e0edff; }
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+.avatar {
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  background: #e5edf9;
+  color: #1e4785;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+.profile label { display: block; font-size: 12px; font-weight: 700; }
+.profile small { font-size: 11px; color: var(--muted); }
+@media(max-width: 960px) { .profile label, .profile small { display: none; } }
+
+/* Main Content Area */
+main {
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 20px 18px calc(var(--bottom-bar-height) + 30px);
+}
+@media(min-width: 961px) {
+  main { padding: 28px 34px 60px; }
+}
+
+/* Headings */
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  flex-direction: column;
+}
+@media(min-width: 768px) {
+  .head { align-items: center; flex-direction: row; }
+}
+.eyebrow {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #6f87aa;
+  font-weight: 750;
+  margin: 0 0 4px;
+}
+h1 { font-size: 22px; letter-spacing: -.6px; line-height: 1.25; margin: 0 0 5px; }
+@media(min-width: 768px) { h1 { font-size: 26px; } }
+h2 { font-size: 16px; letter-spacing: -.25px; margin: 0; }
+h3 { font-size: 13.5px; margin: 0; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 0; }
+
+/* Tags & Badges */
+.tag, .badge {
+  border-radius: 999px;
+  padding: 4px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.tag.blue { color: #2b63b1; background: #e7efff; }
+.tag.green { color: var(--green); background: var(--green-bg); }
+.tag.amber { color: var(--amber); background: var(--amber-bg); }
+.tag.red { color: var(--red); background: var(--red-bg); }
+.tag.gray { color: #6a778b; background: #edf0f4; }
+
+/* Buttons & Selectors */
+.btn {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #39475a;
+  padding: 10px 14px;
+  font-weight: 650;
+  font-size: 13.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all .15s ease;
+  min-height: 42px;
+}
+.btn:hover, .btn:active { background: #f3f6fc; }
+.btn.primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(37,99,235,0.25);
+}
+.btn.primary:hover, .btn.primary:active { background: #1954d2; }
+.btn.small { padding: 6px 10px; font-size: 12px; min-height: 32px; border-radius: 8px; }
+
+.ctrl-wrap {
+  width: 100%;
+}
+@media(min-width: 768px) { .ctrl-wrap { width: auto; } }
+
+.ctrl {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--ink);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  min-height: 44px;
+  box-shadow: var(--shadow-sm);
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23718097%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+@media(min-width: 768px) {
+  .ctrl { min-width: 220px; max-width: 320px; }
+}
+.ctrl:focus {
+  border-color: #87b3ff;
+  box-shadow: 0 0 0 3px #eaf2ff;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-pad { padding: 18px; }
+@media(min-width: 768px) { .card-pad { padding: 22px; } }
+
+/* Cards Grid for Stats */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media(min-width: 1024px) {
+  .cards { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+}
+.stat {
+  padding: 14px 14px;
+  min-height: 105px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+@media(min-width: 768px) {
+  .stat { padding: 18px 20px; min-height: 130px; }
+}
+.stat-title {
+  font-size: 11.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+.stat-icon { color: #7b8ca6; font-size: 16px; }
+.stat-value {
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -.6px;
+  margin: 6px 0 2px;
+  color: var(--ink);
+}
+@media(min-width: 768px) { .stat-value { font-size: 26px; } }
+.stat-desc { font-size: 10.5px; color: var(--muted); }
+
+/* Horizontal Segmented Tabs */
+.strip {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.strip::-webkit-scrollbar { display: none; }
+.tab {
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: #68788e;
+  font-weight: 650;
+  font-size: 12.5px;
+  flex-shrink: 0;
+  min-height: 38px;
+}
+.tab.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(17,35,61,0.25);
+}
+
+/* Layouts */
+.layout2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+@media(min-width: 961px) {
+  .layout2 { grid-template-columns: 1.5fr 1fr; gap: 16px; margin-top: 16px; }
+  .layout2.equal { grid-template-columns: 1fr 1fr; }
+}
+
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Progress rows */
+.progress-row { margin: 12px 0; }
+.progress-name {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+}
+.progress-name strong { font-weight: 750; }
+.progress {
+  height: 8px;
+  background: #edf1f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 999px;
+  transition: width .3s ease;
+}
+.fill.green { background: var(--green); }
+.fill.amber { background: var(--amber); }
+.fill.red { background: var(--red); }
+
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.boxline {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+
+/* Tables */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -4px;
+}
+.panel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 460px;
+}
+.panel-table th {
+  text-align: left;
+  font-size: 11px;
+  color: #728198;
+  letter-spacing: .35px;
+  font-weight: 750;
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--line);
+  background: #fafbfd;
+}
+.panel-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+.panel-table tr:last-child td { border-bottom: 0; }
+.clickable { cursor: pointer; }
+.clickable:hover, .clickable:active { background: #f8fafd; }
+
+/* Responsive Mobile Cards for Project List */
+.mobile-project-card {
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.mobile-project-card:last-child { border-bottom: 0; }
+.mobile-project-card:active { background: #f8fafd; }
+.mpc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+.mpc-id { font-weight: 750; font-size: 13.5px; color: var(--navy); }
+.mpc-name { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.mpc-metrics {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #4b5563;
+  margin-top: 8px;
+}
+
+/* Alerts */
+.alert {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: #fdf5e7;
+  border: 1px solid #fae4b9;
+  margin-bottom: 10px;
+}
+.alert-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.alert-icon.red { background: var(--red); }
+.alert-body h3 { font-size: 13px; margin: 0 0 2px; color: #1f2937; }
+.alert-body p { font-size: 11.5px; color: #6b7280; margin: 0; line-height: 1.35; }
+
+/* Source list */
+.source-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media(min-width: 640px) { .source-list { grid-template-columns: repeat(2, 1fr); } }
+@media(min-width: 1024px) { .source-list { grid-template-columns: repeat(3, 1fr); } }
+.source {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.source-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.source-symbol {
+  height: 32px;
+  width: 32px;
+  border-radius: 8px;
+  background: #eef3fc;
+  color: #39619d;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+.source p { color: var(--muted); font-size: 11px; margin: 4px 0 0; }
+
+/* Definitions */
+.definition {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  border-bottom: 1px solid #eef1f5;
+  padding: 10px 0;
+}
+.definition:last-child { border: 0; }
+.definition span:first-child { color: var(--muted); font-size: 12px; }
+.definition span:last-child { font-weight: 650; font-size: 12.5px; word-break: break-word; }
+
+/* Department & Role Form */
+.role-banner {
+  background: #eef4ff;
+  border: 1px solid #dbe7fb;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: #2c548b;
+  margin-bottom: 16px;
+}
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media(min-width: 768px) { .field-grid { grid-template-columns: 1fr 1fr; } }
+.field-wrap label {
+  display: block;
+  font-weight: 680;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+}
+.field-wrap small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+.field-wrap input, .field-wrap select, .field-wrap textarea {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #d9e1ed;
+  padding: 12px 14px;
+  background: #fff;
+  color: #20304a;
+  font-size: 16px; /* Prevents auto-zoom on iOS Safari */
+  min-height: 48px;
+}
+.field-wrap textarea { min-height: 100px; resize: vertical; }
+.field-wrap input:focus, .field-wrap textarea:focus, .field-wrap select:focus {
+  border-color: #609df5;
+  outline: 3px solid #eaf2ff;
+}
+.field-wrap.full { grid-column: 1 / -1; }
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.task-row:last-child { border: 0; }
+.task-index {
+  height: 28px;
+  width: 28px;
+  border-radius: 50%;
+  background: #eff3f9;
+  display: grid;
+  place-items: center;
+  color: #5a7092;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.task-info { flex: 1; }
+.task-info strong { display: block; font-size: 12px; }
+.task-info small { color: var(--muted); font-size: 11px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  left: 18px;
+  right: 18px;
+  bottom: calc(var(--bottom-bar-height) + 16px);
+  background: #173c32;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 120;
+  display: none;
+  font-size: 13px;
+  align-items: center;
+  justify-content: space-between;
+}
+@media(min-width: 768px) {
+  .toast { left: auto; right: 24px; bottom: 24px; max-width: 380px; }
+}
+.toast.show { display: flex; }
+.toast button { background: none; color: white; font-size: 18px; padding: 0 6px; }
+
+/* Audit */
+.audit-entry {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.audit-entry:last-child { border: 0; }
+.audit-bullet {
+  border: 2px solid #9fb8de;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.audit-text strong { font-size: 12.5px; display: block; }
+.audit-text p { font-size: 11.5px; color: var(--muted); margin: 3px 0; }
+.audit-text small { font-size: 10.5px; color: #8595aa; }
+
+.notice {
+  background: #fff9eb;
+  border: 1px solid #fae7bb;
+  color: #8f6517;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  margin: 15px 0;
+  line-height: 1.4;
+}
+.empty { padding: 40px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+.footnote { margin-top: 20px; color: #8793a5; font-size: 11px; line-height: 1.4; }
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-bar-height);
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.04);
+}
+.mob-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  flex: 1;
+  height: 100%;
+  background: transparent;
+  cursor: pointer;
+  transition: color .15s ease;
+}
+.mob-nav-item .mob-icon { font-size: 19px; line-height: 1; }
+.mob-nav-item.active {
+  color: var(--blue);
+}
+.mob-nav-item.active .mob-icon {
+  transform: scale(1.08);
+}
+
+/* Role Modal for Mobile */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 150;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: #fff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px 20px 0 0;
+  padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+  animation: slideUp .25s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-sheet h3 { font-size: 16px; margin-bottom: 14px; }
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.role-option.selected {
+  background: #eef4ff;
+  border-color: #2563eb;
+  color: #1e40af;
+}
+</style>
+</head>
+<body>
+
+<!-- Mobile Drawer Backdrop -->
+<div class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<!-- Sidebar Drawer -->
+<aside id="side">
+  <div class="brand">
+    <div class="brand-mark">E</div>
+    <div>
+      <div class="brand-name">EVM Control</div>
+      <div class="brand-sub">Project intelligence</div>
+    </div>
+    <button class="close-drawer-btn" onclick="closeSidebar()">✕</button>
+  </div>
+  
+  <div class="nav-label">Pracovní prostor</div>
+  <div id="navigation"></div>
+  
+  <div class="sidebar-bottom">
+    <strong>EVM MOBILE CONTROL</strong><br>
+    Optimalizováno pro dotykové telefony<br>
+    Listopad 2026
+  </div>
+</aside>
+
+<!-- Main Shell -->
+<div class="shell">
+  <!-- Sticky Topbar -->
+  <header class="topbar">
+    <div class="layout-controls">
+      <button class="menu-hamb" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-brand">
+        <span class="crumb">Interní projekty &nbsp;/&nbsp; <strong id="breadcrumb">Dashboard</strong></span>
+      </div>
+    </div>
+    
+    <div class="top-actions">
+      <div class="search-wrap">
+        <input id="globalSearch" class="top-search" oninput="searchChanged()" placeholder="⌕  Hledat projekt…" />
+      </div>
+      
+      <!-- Role Switcher Pill -->
+      <button class="role-badge-btn" onclick="openRoleModal()">
+        <span id="roleBadgeIcon">👤</span>
+        <span id="roleBadgeText">PM</span>
+      </button>
+
+      <div class="profile">
+        <div class="avatar" id="avatar">PM</div>
+        <div>
+          <label id="profileName">Projektový manažer</label>
+          <small id="profileRole">Plná viditelnost dat</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- App Main Content Container -->
+  <main id="app"></main>
+</div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="mobile-bottom-bar" id="mobileBottomBar">
+  <!-- Rendered dynamically by nav() -->
+</nav>
+
+<!-- Role Selector Bottom Sheet Modal -->
+<div class="modal-overlay" id="roleModal" onclick="closeRoleModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;">Přepnout zkušební roli</h3>
+      <button onclick="closeRoleModal()" style="background:none;font-size:18px;color:var(--muted);padding:4px 8px;">✕</button>
+    </div>
+    <p class="hint" style="margin-bottom:16px;">Vyberte středisko pro simulaci oprávnění a polí:</p>
+    <div id="roleModalOptions"></div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+  <span id="toastMessage"></span>
+  <button onclick="document.getElementById('toast').classList.remove('show')">✕</button>
+</div>
+
+<script>
+const defs = {
+  accounting: {
+    label: 'Účetní středisko',
+    short: 'Účetní',
+    symbol: '▣',
+    fields: [
+      { key: 'actualCost', label: 'Skutečné náklady (Kč)', type: 'number', hint: 'Zaúčtované náklady projektu; vstup do EVM ukazatele AC.' },
+      { key: 'invoiced', label: 'Vyfakturováno (Kč)', type: 'number' },
+      { key: 'costNote', label: 'Komentář k nákladům', type: 'textarea' }
+    ]
+  },
+  sales: {
+    label: 'Obchodní středisko',
+    short: 'Obchodní',
+    symbol: '◈',
+    fields: [
+      { key: 'contract', label: 'Hodnota zakázky (Kč)', type: 'number' },
+      { key: 'client', label: 'Zákazník', type: 'text' },
+      { key: 'salesState', label: 'Stav obchodního případu', type: 'select', options: ['Příprava', 'Nabídka odeslána', 'Potvrzeno', 'Změnový list', 'Uzavřeno'] },
+      { key: 'salesNote', label: 'Obchodní poznámka', type: 'textarea' }
+    ]
+  },
+  era: {
+    label: 'ERA báze',
+    short: 'ERA',
+    symbol: '▤',
+    fields: [
+      { key: 'progress', label: 'Potvrzené dokončení (%)', type: 'number', max: 100, min: 0, hint: 'V reálném EVM by se používala schválená pravidla pro měření dokončené práce.' },
+      { key: 'eraRef', label: 'Referenční číslo ERA', type: 'text' },
+      { key: 'eraStage', label: 'Aktuální technický stav', type: 'select', options: ['Projektování', 'Příprava výroby', 'Výroba', 'Montáž', 'Testování', 'Hotovo'] },
+      { key: 'eraNote', label: 'Technická poznámka', type: 'textarea' }
+    ]
+  }
+};
+
+const originals = [
+  {
+    id: 'EVM-2026-0042',
+    name: 'Modernizace výrobní linky A',
+    client: 'Průmyslový zákazník A',
+    owner: 'Projektový manažer A',
+    budget: 12500000,
+    pv: 7500000,
+    deadline: '2027-03-31',
+    baseProgress: 55,
+    fields: {
+      actualCost: 8450000,
+      invoiced: 6200000,
+      costNote: 'Vyšší náklady na materiál oproti plánu.',
+      contract: 14000000,
+      client: 'Průmyslový zákazník A',
+      salesState: 'Potvrzeno',
+      salesNote: 'Dodatek ke smlouvě ke schválení.',
+      progress: 55,
+      eraRef: 'ERA-51084',
+      eraStage: 'Výroba',
+      eraNote: 'Kompletace linky ve výrobě.'
+    },
+    date: { accounting: '2026-11-06', sales: '2026-11-05', era: '2026-11-06' },
+    missing: 'Aktualizace harmonogramu',
+    tasks: [
+      ['Specifikace', '2026-08-30', 100],
+      ['Projektování', '2026-10-20', 100],
+      ['Nákup dílů', '2026-11-15', 80],
+      ['Výroba', '2027-01-31', 55],
+      ['Předání', '2027-03-31', 0]
+    ]
+  },
+  {
+    id: 'EVM-2026-0057',
+    name: 'Automatizace testovací stanice',
+    client: 'Průmyslový zákazník B',
+    owner: 'Projektový manažer B',
+    budget: 9200000,
+    pv: 4140000,
+    deadline: '2027-05-20',
+    baseProgress: 50,
+    fields: {
+      actualCost: 4000000,
+      invoiced: 3500000,
+      costNote: 'Náklady odpovídají fázi projektu.',
+      contract: 11000000,
+      client: 'Průmyslový zákazník B',
+      salesState: 'Potvrzeno',
+      salesNote: 'Beze změn.',
+      progress: 50,
+      eraRef: 'ERA-51904',
+      eraStage: 'Projektování',
+      eraNote: 'Příprava dokumentace.'
+    },
+    date: { accounting: '2026-11-06', sales: '2026-11-04', era: '2026-11-03' },
+    missing: '',
+    tasks: [
+      ['Specifikace', '2026-09-10', 100],
+      ['Projektování', '2026-12-01', 75],
+      ['Nákup', '2027-01-20', 20],
+      ['Montáž', '2027-04-20', 0],
+      ['Předání', '2027-05-20', 0]
+    ]
+  },
+  {
+    id: 'EVM-2026-0061',
+    name: 'Rozšíření montážního provozu',
+    client: 'Průmyslový zákazník C',
+    owner: 'Projektový manažer C',
+    budget: 18000000,
+    pv: 10800000,
+    deadline: '2027-07-15',
+    baseProgress: 50,
+    fields: {
+      actualCost: 10350000,
+      invoiced: 7000000,
+      costNote: 'Náklady na subdodávky nad očekáváním.',
+      contract: 21500000,
+      client: 'Průmyslový zákazník C',
+      salesState: 'Změnový list',
+      salesNote: 'Změna konfigurace strojů.',
+      progress: 50,
+      eraRef: 'ERA-52007',
+      eraStage: 'Výroba',
+      eraNote: 'Čeká se na potvrzení termínu komponent.'
+    },
+    date: { accounting: '2026-11-05', sales: '2026-11-06', era: '2026-11-02' },
+    missing: 'Dokumentace nákupu',
+    tasks: [
+      ['Specifikace', '2026-08-20', 100],
+      ['Projektování', '2026-10-15', 100],
+      ['Nákup', '2026-12-20', 55],
+      ['Výroba', '2027-05-20', 35],
+      ['Předání', '2027-07-15', 0]
+    ]
+  }
+];
+
+let projects = JSON.parse(localStorage.getItem('evm-demo-projects') || 'null') || originals;
+let history = JSON.parse(localStorage.getItem('evm-demo-history') || 'null') || [
+  { id: 'EVM-2026-0042', when: '06. 11. 2026 09:12', actor: 'Účetní oddělení', what: 'Aktualizace skutečných nákladů' },
+  { id: 'EVM-2026-0042', when: '05. 11. 2026 14:40', actor: 'Obchodní oddělení', what: 'Změna obchodní poznámky' },
+  { id: 'EVM-2026-0057', when: '04. 11. 2026 11:22', actor: 'Projektový manažer', what: 'Kontrola harmonogramu' }
+];
+
+let state = {
+  role: 'manager',
+  page: 'dashboard',
+  project: 'EVM-2026-0042',
+  detailTab: 'overview',
+  query: ''
+};
+
+// Utilities
+const fmt = n => Math.round(Number(n) || 0).toLocaleString('cs-CZ');
+const money = n => fmt(n) + ' Kč';
+const m = n => (Number(n) / 1e6).toLocaleString('cs-CZ', { maximumFractionDigits: 2 }) + ' mil. Kč';
+const percent = n => (Number(n) * 100).toLocaleString('cs-CZ', { maximumFractionDigits: 1 }) + ' %';
+const safe = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const p = () => projects.find(x => x.id === state.project) || projects[0];
+const isPM = () => state.role === 'manager';
+
+const score = x => {
+  const ac = Number(x.fields.actualCost) || 0;
+  const ev = x.budget * Number(x.fields.progress) / 100;
+  const pv = x.pv;
+  const cpi = ac ? ev / ac : null;
+  const spi = pv ? ev / pv : null;
+  const eac = cpi && cpi > 0 ? x.budget / cpi : null;
+  return { ac, ev, pv, cpi, spi, eac, delta: eac === null ? null : eac - x.budget };
+};
+
+const ratio = (a, b) => b ? Math.min(100, Math.max(0, a / b * 100)) : 0;
+
+function tag(t, variant = 'green') {
+  return `<span class="tag ${variant}">${t}</span>`;
+}
+
+function notify(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMessage').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3400);
+}
+
+// Drawer controls
+function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+
+// Role Modal
+function openRoleModal() {
+  const container = document.getElementById('roleModalOptions');
+  const roles = [
+    { id: 'manager', label: 'Projektový manažer', icon: '👤', sub: 'Kompletní přehled všech středisek' },
+    { id: 'accounting', label: 'Účetní středisko', icon: '▣', sub: 'Zadávání zaúčtovaných nákladů (AC)' },
+    { id: 'sales', label: 'Obchodní středisko', icon: '◈', sub: 'Smluvní hodnota zakázky a zákazník' },
+    { id: 'era', label: 'ERA báze', icon: '▤', sub: 'Potvrzená procenta dokončení etap' }
+  ];
+  
+  container.innerHTML = roles.map(r => `
+    <div class="role-option ${state.role === r.id ? 'selected' : ''}" onclick="setRole('${r.id}'); closeRoleModal();">
+      <span style="font-size:20px;">${r.icon}</span>
+      <div>
+        <div>${r.label}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:normal;">${r.sub}</div>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('roleModal').classList.add('open');
+}
+
+function closeRoleModal(e) {
+  if (e && e.target !== document.getElementById('roleModal')) return;
+  document.getElementById('roleModal').classList.remove('open');
+}
+
+function setRole(val) {
+  state.role = val;
+  state.page = isPM() ? 'dashboard' : 'department';
+  state.detailTab = 'overview';
+  render();
+  notify('Přepnuto do role: ' + (isPM() ? 'Projektový manažer' : defs[state.role].label));
+}
+
+function go(page) {
+  state.page = page;
+  render();
+  closeSidebar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setProject(id) {
+  state.project = id;
+  state.page = isPM() ? 'dashboard' : 'department';
+  state.detailTab = 'overview';
+  render();
+}
+
+function setTab(tab) {
+  state.detailTab = tab;
+  render();
+}
+
+function searchChanged() {
+  state.query = document.getElementById('globalSearch').value.toLowerCase();
+  if (state.query.trim()) {
+    state.page = 'projects';
+  }
+  render();
+}
+
+function sourceStatus(label, variant, date) {
+  return `
+    <div class="source">
+      <div class="source-top">
+        <div class="source-symbol">
+          ${label === 'Účetní' ? '▣' : label === 'Obchodní' ? '◈' : label === 'ERA báze' ? '▤' : label === 'Harmonogram' ? '▦' : '▧'}
+        </div>
+        ${tag(variant === 'green' ? 'Aktuální' : variant === 'amber' ? 'Kontrola' : 'Čeká', variant)}
+      </div>
+      <strong>${label}</strong>
+      <p>${date}</p>
+    </div>
+  `;
+}
+
+function nav() {
+  // Sidebar menu
+  const menu = isPM()
+    ? [["dashboard", "▦", "Dashboard"], ["projects", "◫", "Všechny projekty"], ["sources", "⇄", "Datové vstupy"], ["audit", "◷", "Historie změn"]]
+    : [["department", "▤", "Moje středisko"], ["projects", "◫", "Přiřazené projekty"], ["audit", "◷", "Historie úprav"]];
+
+  document.getElementById('navigation').innerHTML = menu.map(([id, icon, label]) => `
+    <button class="nav-btn ${state.page === id ? 'active' : ''}" onclick="go('${id}')">
+      <span class="nav-icon">${icon}</span>${label}
+    </button>
+  `).join('') + `
+    <div class="nav-label">Přepnout roli</div>
+    <div style="padding:0 4px">
+      <select class="ctrl" style="width:100%;background:#233d5b;color:#fff;border-color:#3e5775" onchange="setRole(this.value)">
+        <option value="manager" ${state.role === 'manager' ? 'selected' : ''}>Projektový manažer</option>
+        <option value="accounting" ${state.role === 'accounting' ? 'selected' : ''}>Účetní oddělení</option>
+        <option value="sales" ${state.role === 'sales' ? 'selected' : ''}>Obchodní oddělení</option>
+        <option value="era" ${state.role === 'era' ? 'selected' : ''}>ERA středisko</option>
+      </select>
+    </div>
+  `;
+
+  // Mobile Bottom Bar Navigation
+  const bottomMenu = isPM()
+    ? [["dashboard", "▦", "Přehled"], ["projects", "◫", "Projekty"], ["sources", "⇄", "Zdroje"], ["audit", "◷", "Historie"]]
+    : [["department", "▤", "Formulář"], ["projects", "◫", "Projekty"], ["audit", "◷", "Historie"]];
+
+  document.getElementById('mobileBottomBar').innerHTML = bottomMenu.map(([id, icon, label]) => `
+    <button class="mob-nav-item ${state.page === id ? 'active' : ''}" onclick="go('${id}')">
+      <span class="mob-icon">${icon}</span>
+      <span>${label}</span>
+    </button>
+  `).join('');
+
+  // Topbar updates
+  const roleShort = isPM() ? 'PM' : defs[state.role].short;
+  document.getElementById('roleBadgeText').textContent = roleShort;
+  document.getElementById('profileName').textContent = isPM() ? 'Projektový manažer' : defs[state.role].label;
+  document.getElementById('profileRole').textContent = isPM() ? 'Přehled všech středisek' : 'Editace vlastních dat';
+  document.getElementById('avatar').textContent = roleShort;
+  document.getElementById('breadcrumb').textContent = ({
+    dashboard: 'Dashboard',
+    projects: 'Projekty',
+    department: 'Moje středisko',
+    sources: 'Datové vstupy',
+    audit: 'Historie změn'
+  })[state.page] || 'Detail';
+}
+
+function header(eyebrow, title, description, actions = '') {
+  return `
+    <div class="head">
+      <div>
+        <p class="eyebrow">${eyebrow}</p>
+        <h1>${title}</h1>
+        <p class="hint">${description}</p>
+      </div>
+      <div class="ctrl-wrap" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;">
+        ${actions}
+      </div>
+    </div>
+  `;
+}
+
+function projectSelector() {
+  return `
+    <select class="ctrl" onchange="setProject(this.value)">
+      ${projects.map(x => `<option value="${x.id}" ${x.id === state.project ? 'selected' : ''}>${safe(x.id)} · ${safe(x.name)}</option>`).join('')}
+    </select>
+  `;
+}
+
+function stat(label, val, subtitle, icon) {
+  return `
+    <div class="card stat">
+      <div class="stat-title">${label} <span class="stat-icon">${icon}</span></div>
+      <div class="stat-value">${val}</div>
+      <div class="stat-desc">${subtitle}</div>
+    </div>
+  `;
+}
+
+function managerDashboard() {
+  let x = p(), q = score(x);
+  let risk = q.delta !== null && q.delta > 0;
+  let notices = [
+    { title: 'Odhadované překročení rozpočtu', text: `Předpoklad nákladů do dokončení: ${m(q.eac)}; odchylka ${m(q.delta)}.`, critical: true, show: risk },
+    { title: 'Časový výkon pod plánem', text: `SPI ${q.spi?.toFixed(2) ?? '—'} – hodnota zaostává za plánem.`, critical: false, show: q.spi !== null && q.spi < .95 },
+    { title: 'Nedodaný podklad', text: x.missing || 'Zkontrolovat poslední synchronizaci harmonogramu.', critical: false, show: !!x.missing }
+  ].filter(a => a.show);
+
+  return header('Projektový manažer', 'Řídicí panel projektu', 'Jednotný přehled rozpočtu, plnění a harmonogramu',
+    projectSelector() + `<button class="btn" style="flex-shrink:0;" onclick="notify('Export do PDF připraven v plné verzi.')">⇩ Export</button>`) +
+    `
+    <div class="strip">
+      <button class="tab ${state.detailTab === 'overview' ? 'active' : ''}" onclick="setTab('overview')">Souhrn</button>
+      <button class="tab ${state.detailTab === 'sources' ? 'active' : ''}" onclick="setTab('sources')">Vstupní data</button>
+      <button class="tab ${state.detailTab === 'schedule' ? 'active' : ''}" onclick="setTab('schedule')">Harmonogram</button>
+      <button class="tab ${state.detailTab === 'history' ? 'active' : ''}" onclick="setTab('history')">Historie změn</button>
+    </div>
+    ` +
+    (state.detailTab === 'overview' ? `
+      <div class="cards">
+        ${stat('Schválený rozpočet (BAC)', m(x.budget), 'Výchozí rozpočet', '▣')}
+        ${stat('Skutečné náklady (AC)', m(q.ac), 'Zdroj: účtárna', '◫')}
+        ${stat('Odhad dokončení (EAC)', m(q.eac), risk ? `+${m(q.delta)} nad rámec` : 'V rámci rozpočtu', '◉')}
+        ${stat('Dokončení projektu', x.fields.progress + ' %', 'Zdroj: ERA báze', '▥')}
+      </div>
+
+      <div class="layout2">
+        <!-- EVM Card -->
+        <div class="card card-pad">
+          <div class="card-heading">
+            <h2>Plán vs. skutečnost (EVM)</h2>
+            ${tag('Automatický výpočet', 'blue')}
+          </div>
+          <div class="legend">
+            <span><i class="dot" style="background:#2563eb"></i>PV (plán)</span>
+            <span><i class="dot" style="background:#128264"></i>EV (hodnota)</span>
+            <span><i class="dot" style="background:#aa701a"></i>AC (náklady)</span>
+          </div>
+          ${[['PV · plánované práce', q.pv, ''], ['EV · vytvořená hodnota', q.ev, 'green'], ['AC · skutečné náklady', q.ac, 'amber']].map(([l, v, c]) => `
+            <div class="progress-row">
+              <div class="progress-name">
+                <span>${l}</span>
+                <strong>${m(v)}</strong>
+              </div>
+              <div class="progress">
+                <div class="fill ${c}" style="width:${ratio(v, x.budget)}%"></div>
+              </div>
+            </div>
+          `).join('')}
+          <div class="boxline" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <small class="hint">CPI – nákladová efektivita</small>
+              <div style="font-size:20px;font-weight:800;color:${q.cpi >= 1 ? '#128264' : '#c44646'}">${q.cpi?.toFixed(2) ?? '—'}</div>
+            </div>
+            <div>
+              <small class="hint">SPI – časová efektivita</small>
+              <div style="font-size:20px;font-weight:800;color:${q.spi >= 1 ? '#128264' : '#aa701a'}">${q.spi?.toFixed(2) ?? '—'}</div>
+            </div>
+          </div>
+          <p class="footnote">Ilustrační EVM výpočet; EV vychází z váhy potvrzeného dokončení.</p>
+        </div>
+
+        <!-- Notices & Deadline Card -->
+        <div class="card card-pad">
+          <div class="card-heading">
+            <h2>Upozornění a odchylky</h2>
+            ${tag(notices.length + ' aktivní', notices.length ? 'amber' : 'green')}
+          </div>
+          ${notices.length ? notices.map(n => `
+            <div class="alert">
+              <div class="alert-icon ${n.critical ? 'red' : ''}">!</div>
+              <div class="alert-body">
+                <h3>${n.title}</h3>
+                <p>${n.text}</p>
+              </div>
+            </div>
+          `).join('') : '<div class="empty">Žádné kritické odchylky.</div>'}
+          <div class="boxline">
+            <strong style="font-size:11.5px;color:var(--muted);text-transform:uppercase;">Plánovaný termín dokončení</strong>
+            <div style="font-size:18px;font-weight:750;margin-top:3px;color:var(--navy);">
+              ${new Date(x.deadline + 'T00:00:00').toLocaleDateString('cs-CZ')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout2 equal" style="margin-top:14px;">
+        <!-- Center Inputs -->
+        <div class="card card-pad">
+          <div class="card-heading">
+            <h2>Vstupy středisek</h2>
+            <button class="btn small" onclick="setTab('sources')">Detail</button>
+          </div>
+          ${Object.entries(defs).map(([id, info]) => `
+            <div class="task-row">
+              <div class="task-index">${info.symbol}</div>
+              <div class="task-info">
+                <strong>${info.label}</strong>
+                <small>Změna ${new Date(x.date[id] + 'T00:00:00').toLocaleDateString('cs-CZ')}</small>
+              </div>
+              ${tag('Načteno', 'green')}
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Schedule milestones -->
+        <div class="card card-pad">
+          <div class="card-heading">
+            <h2>Rozpracovanost etap</h2>
+            <button class="btn small" onclick="setTab('schedule')">Plán</button>
+          </div>
+          ${x.tasks.map(t => `
+            <div style="margin:10px 0;">
+              <div class="progress-name">
+                <span>${safe(t[0])}</span>
+                <strong>${t[2]} %</strong>
+              </div>
+              <div class="progress">
+                <div class="fill ${t[2] === 100 ? 'green' : ''}" style="width:${t[2]}%"></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : state.detailTab === 'sources' ? sourcesDetail(x) : state.detailTab === 'schedule' ? schedule(x) : auditView(x.id));
+}
+
+function sourcesDetail(x) {
+  let q = score(x);
+  return `
+    <div class="card card-pad">
+      <div class="card-heading">
+        <div>
+          <h2>Vstupy a synchronizace</h2>
+          <p class="section-sub">K projektu se propojují informace z různých oddělení.</p>
+        </div>
+        ${tag('6 zdrojů', 'blue')}
+      </div>
+      <div class="source-list">
+        ${sourceStatus('Účetní', 'green', 'Poslední data: ' + x.date.accounting)}
+        ${sourceStatus('Obchodní', 'green', 'Poslední data: ' + x.date.sales)}
+        ${sourceStatus('ERA báze', 'green', 'Poslední data: ' + x.date.era)}
+        ${sourceStatus('EVM report', 'green', 'Přepočítáno z dat')}
+        ${sourceStatus('Harmonogram', x.missing ? 'amber' : 'green', x.missing || 'Dostupný')}
+        ${sourceStatus('Podklady oddělení', x.missing ? 'amber' : 'green', x.missing || 'Ověřeno')}
+      </div>
+    </div>
+
+    <div class="layout2 equal" style="margin-top:14px;">
+      <div class="card card-pad">
+        <h2>Finanční údaje</h2>
+        <div class="definition"><span>Rozpočet (BAC)</span><span>${money(x.budget)}</span></div>
+        <div class="definition"><span>Skutečné náklady</span><span>${money(q.ac)}</span></div>
+        <div class="definition"><span>Fakturace</span><span>${money(x.fields.invoiced)}</span></div>
+        <div class="definition"><span>Smlouva</span><span>${money(x.fields.contract)}</span></div>
+      </div>
+      <div class="card card-pad">
+        <h2>Obchod a technická data</h2>
+        <div class="definition"><span>Zákazník</span><span>${safe(x.fields.client)}</span></div>
+        <div class="definition"><span>Stav případu</span><span>${safe(x.fields.salesState)}</span></div>
+        <div class="definition"><span>ERA kód</span><span>${safe(x.fields.eraRef)}</span></div>
+        <div class="definition"><span>Stav výroby</span><span>${safe(x.fields.eraStage)}</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function schedule(x) {
+  return `
+    <div class="card card-pad">
+      <div class="card-heading">
+        <div>
+          <h2>Plán projektu / Schedule</h2>
+          <p class="section-sub">Milníky propojené s aktuálním stavem z oddělení.</p>
+        </div>
+        ${tag(x.missing ? 'Revize nutná' : 'Aktuální', x.missing ? 'amber' : 'green')}
+      </div>
+      <div class="table-wrap">
+        <table class="panel-table">
+          <thead>
+            <tr><th>Etapa</th><th>Termín</th><th>Plnění</th><th>Stav</th></tr>
+          </thead>
+          <tbody>
+            ${x.tasks.map(t => `
+              <tr>
+                <td><strong>${safe(t[0])}</strong></td>
+                <td>${new Date(t[1] + 'T00:00:00').toLocaleDateString('cs-CZ')}</td>
+                <td>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <div class="progress" style="width:75px;">
+                      <div class="fill ${t[2] === 100 ? 'green' : ''}" style="width:${t[2]}%"></div>
+                    </div>
+                    <span>${t[2]} %</span>
+                  </div>
+                </td>
+                <td>${tag(t[2] === 100 ? 'Hotovo' : t[2] === 0 ? 'Čeká' : 'Probíhá', t[2] === 100 ? 'green' : t[2] === 0 ? 'gray' : 'blue')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function department() {
+  let x = p(), def = defs[state.role];
+  return header(def.label, 'Pracovní formulář střediska', 'Zadávejte údaje svého oddělení. Ostatní zdroje zůstávají chráněné.',
+    projectSelector()) +
+    `
+    <div class="role-banner">
+      <div style="font-size:24px;">🔒</div>
+      <div>
+        <strong>Oprávnění: ${def.label}</strong>
+        <p style="margin:2px 0 0;font-size:11.5px;">V tomto formuláři editujete pouze pole vlastního střediska.</p>
+      </div>
+    </div>
+
+    <div class="layout2">
+      <div class="card card-pad">
+        <div class="card-heading">
+          <div>
+            <h2>Aktualizace projektu ${safe(x.id)}</h2>
+            <p class="section-sub">${safe(x.name)}</p>
+          </div>
+          ${tag('Úpravy povoleny', 'green')}
+        </div>
+
+        <form id="deptForm" onsubmit="saveForm(event)">
+          <div class="field-grid">
+            ${def.fields.map(f => `
+              <div class="field-wrap ${f.type === 'textarea' ? 'full' : ''}">
+                <label for="field_${f.key}">${safe(f.label)}</label>
+                ${f.type === 'textarea'
+                  ? `<textarea id="field_${f.key}" data-field="${f.key}">${safe(x.fields[f.key])}</textarea>`
+                  : f.type === 'select'
+                  ? `<select id="field_${f.key}" data-field="${f.key}">${f.options.map(o => `<option ${x.fields[f.key] === o ? 'selected' : ''}>${safe(o)}</option>`).join('')}</select>`
+                  : `<input id="field_${f.key}" data-field="${f.key}" type="${f.type}" inputmode="${f.type === 'number' ? 'decimal' : 'text'}" ${f.type === 'number' ? 'step="any"' : ''} ${f.min !== undefined ? 'min="' + f.min + '"' : ''} ${f.max !== undefined ? 'max="' + f.max + '"' : ''} value="${safe(x.fields[f.key])}" required />`
+                }
+                ${f.hint ? `<small>${safe(f.hint)}</small>` : ''}
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="boxline" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <span class="hint">Změna: ${new Date(x.date[state.role] + 'T00:00:00').toLocaleDateString('cs-CZ')}</span>
+            <button class="btn primary" style="width:100%;max-width:220px;" type="submit">✓ Uložit aktualizaci</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-heading">
+          <h2>Přehled projektu</h2>
+          ${tag('Pouze pro čtení', 'gray')}
+        </div>
+        <div class="definition"><span>Projekt</span><span>${safe(x.name)}</span></div>
+        <div class="definition"><span>Rozpočet (BAC)</span><span>${money(x.budget)}</span></div>
+        <div class="definition"><span>Dokončení</span><span>${x.fields.progress} %</span></div>
+        <div class="definition"><span>Termín</span><span>${new Date(x.deadline + 'T00:00:00').toLocaleDateString('cs-CZ')}</span></div>
+
+        <div class="boxline">
+          <h3 style="margin-bottom:10px;">Ostatní střediska (zámek)</h3>
+          ${Object.entries(defs).filter(([id]) => id !== state.role).map(([id, z]) => `
+            <div class="task-row">
+              <span class="task-index">${z.symbol}</span>
+              <div class="task-info">
+                <strong>${z.label}</strong>
+                <small>Aktualizace ${x.date[id]}</small>
+              </div>
+              ${tag('🔒', 'gray')}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function saveForm(e) {
+  e.preventDefault();
+  let x = p(), def = defs[state.role];
+  if (!def) { notify('Pro tuto roli není formulář dostupný.'); return; }
+  
+  let changed = [];
+  for (let f of def.fields) {
+    let el = document.querySelector(`[data-field="${f.key}"]`);
+    if (!el) continue;
+    let v = f.type === 'number' ? Number(el.value) : el.value.trim();
+    if (f.type === 'number' && (!Number.isFinite(v) || v < 0 || (f.max !== undefined && v > f.max))) {
+      notify('Nesprávný údaj: ' + f.label);
+      el.focus();
+      return;
+    }
+    if (String(x.fields[f.key]) !== String(v)) {
+      x.fields[f.key] = v;
+      changed.push(f.label);
+    }
+  }
+
+  if (!changed.length) { notify('Nebyly zjištěny žádné změny.'); return; }
+
+  let now = new Date();
+  x.date[state.role] = now.toISOString().slice(0, 10);
+  history.unshift({
+    id: x.id,
+    when: now.toLocaleString('cs-CZ'),
+    actor: def.label,
+    what: 'Aktualizace: ' + changed.join(', ')
+  });
+
+  localStorage.setItem('evm-demo-projects', JSON.stringify(projects));
+  localStorage.setItem('evm-demo-history', JSON.stringify(history));
+  render();
+  notify('Údaje uloženy. Změny se promítly do EVM ukazatelů.');
+}
+
+function projectList() {
+  let visible = projects.filter(x => !state.query || [x.id, x.name, x.client].join(' ').toLowerCase().includes(state.query));
+
+  // Render responsive cards on mobile, table on desktop
+  return header(
+    isPM() ? 'Projektové portfolio' : 'Seznam projektů',
+    isPM() ? 'Všechny projekty' : 'Přiřazené projekty',
+    isPM() ? 'Rychlý přehled stavu rozpočtů a rizik.' : 'Otevřete projekt pro zadání údajů.'
+  ) + `
+    <div class="card">
+      <div class="card-heading" style="padding:16px 18px 12px;margin:0;">
+        <h2>Dostupné projekty</h2>
+        ${tag(visible.length + ' projektů', 'blue')}
+      </div>
+      
+      <!-- Mobile Cards view -->
+      <div class="mobile-project-list">
+        ${visible.map(x => {
+          let q = score(x);
+          return `
+            <div class="mobile-project-card" onclick="setProject('${x.id}')">
+              <div class="mpc-top">
+                <span class="mpc-id">${safe(x.id)}</span>
+                ${tag(q.delta > 0 ? 'Riziko' : 'V normě', q.delta > 0 ? 'amber' : 'green')}
+              </div>
+              <div class="mpc-name">${safe(x.name)}</div>
+              <div class="progress" style="height:6px;margin:8px 0;">
+                <div class="fill" style="width:${x.fields.progress}%"></div>
+              </div>
+              <div class="mpc-metrics">
+                <span>BAC: <strong>${m(x.budget)}</strong></span>
+                <span>Dokončení: <strong>${x.fields.progress} %</strong></span>
+                <span>EAC: <strong>${m(q.eac)}</strong></span>
+              </div>
+            </div>
+          `;
+        }).join('') || '<div class="empty">Nenalezen žádný projekt.</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function sourcesPage() {
+  let x = p();
+  return header('Správa vstupů', 'Datové zdroje', 'Odkud systém přebírá projektová data.', projectSelector()) +
+    sourcesDetail(x) +
+    `<div class="notice">Prototyp demonstruje oddělení odpovědností jednotlivých středisek (Účtárna, Obchod, Výroba, PM) s automatickým propočtem EVM bez nutnosti manuálního přepisování.</div>`;
+}
+
+function auditView(filter) {
+  let events = history.filter(a => !filter || a.id === filter).filter(a => isPM() || a.actor === defs[state.role].label);
+  return `
+    <div class="card card-pad">
+      <div class="card-heading">
+        <h2>Auditní historie</h2>
+        ${tag('Záznamy', 'blue')}
+      </div>
+      ${events.length ? events.map(a => `
+        <div class="audit-entry">
+          <div class="audit-bullet"></div>
+          <div class="audit-text">
+            <strong>${safe(a.what)}</strong>
+            <p>${safe(a.actor)} · ${safe(a.id)}</p>
+            <small>${safe(a.when)}</small>
+          </div>
+        </div>
+      `).join('') : '<div class="empty">V dostupném výběru nejsou záznamy.</div>'}
+    </div>
+  `;
+}
+
+function auditPage() {
+  return header('Bezpečnost a dohled', 'Historie změn', 'Záznam kdo, co a kdy v projektech upravil.') + auditView(null);
+}
+
+function render() {
+  nav();
+  let app = document.getElementById('app');
+  app.innerHTML = state.page === 'dashboard' ? managerDashboard()
+    : state.page === 'department' ? department()
+    : state.page === 'projects' ? projectList()
+    : state.page === 'sources' ? sourcesPage()
+    : auditPage();
+  
+  let search = document.getElementById('globalSearch');
+  if (search && search.value !== state.query) search.value = state.query;
+}
+
+render();
+</script>
+</body>
+</html>
