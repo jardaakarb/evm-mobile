@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERA Systems | Portál technické realizace</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --bg-canvas: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-subtle: #f1f5f9;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --blue: #2563eb;
+            --blue-hover: #1d4ed8;
+            --blue-light: #eff6ff;
+            --blue-border: #bfdbfe;
+            --emerald: #059669;
+            --emerald-light: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --amber: #d97706;
+            --amber-light: #fffbeb;
+            --amber-border: #fde68a;
+            --rose: #dc2626;
+            --rose-light: #fef2f2;
+            --rose-border: #fecaca;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+            --shadow-hover: 0 6px 16px -2px rgba(0, 0, 0, 0.07);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif; }
+        body { background: var(--bg-canvas); color: var(--text-body); min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Top Navigation */
+        .topbar {
+            height: 64px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-logo {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-dot {
+            width: 9px;
+            height: 9px;
+            background: var(--blue);
+            border-radius: 50%;
+        }
+        .portal-badge {
+            background: var(--blue-light);
+            color: var(--blue);
+            border: 1px solid var(--blue-border);
+            font-size: 11px;
+            font-weight: 750;
+            padding: 3px 9px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            background: var(--bg-canvas);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: #dbeafe;
+            color: var(--blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .user-info-text {
+            font-size: 12.5px;
+            line-height: 1.2;
+        }
+        .user-name {
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+        .user-dept {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .btn-logout {
+            padding: 7px 14px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-logout:hover {
+            color: var(--rose);
+            border-color: var(--rose-border);
+            background: var(--rose-light);
+        }
+
+        /* Content Area */
+        .main-wrapper {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Banner */
+        .info-banner {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--blue);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-card);
+        }
+        .banner-text-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+        .banner-text-sub {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+        .role-notice {
+            font-size: 11.5px;
+            font-weight: 650;
+            color: var(--text-muted);
+            background: var(--bg-canvas);
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        /* Grid */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 460px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .portal-grid { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 750;
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+        }
+
+        /* Upload Area */
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 32px 20px;
+            text-align: center;
+            background: var(--bg-canvas);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--blue);
+            background: var(--blue-light);
+        }
+        .drop-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 12px;
+            color: var(--blue);
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.12);
+        }
+        .drop-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+        .drop-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Barrier Alert Card */
+        .barrier-card {
+            margin-top: 18px;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .barrier-approved {
+            background: var(--emerald-light);
+            border: 1px solid var(--emerald-border);
+            color: var(--emerald);
+        }
+        .barrier-rejected {
+            background: var(--rose-light);
+            border: 1px solid var(--rose-border);
+            color: var(--rose);
+        }
+        .barrier-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 750;
+            font-size: 13.5px;
+            margin-bottom: 8px;
+        }
+        .barrier-list {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-body);
+        }
+        .barrier-list li {
+            padding: 4px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .barrier-list li svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Demo Barrier Buttons */
+        .demo-sim-box {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border);
+        }
+        .demo-sim-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .sim-btn-row {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-sim {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 11.5px;
+            font-weight: 650;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-body);
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .btn-sim:hover {
+            border-color: var(--blue);
+            background: var(--bg-subtle);
+        }
+        .btn-sim-danger:hover {
+            border-color: var(--rose-border);
+            background: var(--rose-light);
+            color: var(--rose);
+        }
+
+        /* Table Styling */
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            gap: 12px;
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 280px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 7px 10px 7px 32px;
+            font-size: 12.5px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: #ffffff;
+            color: var(--text-heading);
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: var(--blue);
+        }
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        .db-status-pill {
+            font-size: 11.5px;
+            font-weight: 650;
+            color: var(--emerald);
+            background: var(--emerald-light);
+            border: 1px solid var(--emerald-border);
+            padding: 4px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--emerald);
+            border-radius: 50%;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12.5px;
+        }
+        .data-table th {
+            background: var(--bg-subtle);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .data-table tr:hover td {
+            background: var(--bg-canvas);
+        }
+        .code-pill {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-weight: 750;
+            color: var(--blue);
+            background: var(--blue-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--emerald);
+            border-radius: 999px;
+        }
+        .btn-detail {
+            padding: 5px 9px;
+            font-size: 11.5px;
+            font-weight: 650;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: #ffffff;
+            color: var(--text-heading);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-detail:hover {
+            border-color: var(--blue);
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        /* Modal WBS Details */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 760px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-heading);
+        }
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="topbar">
+    <div class="brand-area">
+        <div class="brand-logo">
+            <span class="brand-dot"></span>
+            ERA a.s. Pardubice
+        </div>
+        <span class="portal-badge">Technická realizace</span>
+    </div>
+
+    <div class="user-nav">
+        <div class="user-pill">
+            <div class="user-avatar">TD</div>
+            <div class="user-info-text">
+                <div class="user-name" id="displayUserName">Ing. Tomáš Dvořák</div>
+                <div class="user-dept" id="displayUserDept">Technik montáží & harmonogramů</div>
+            </div>
+        </div>
+        <a href="/login" class="btn-logout" onclick="sessionStorage.clear(); localStorage.removeItem('era_user');">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Odhlásit se</span>
+        </a>
+    </div>
+</header>
+
+<main class="main-wrapper">
+
+    <!-- Information banner -->
+    <div class="info-banner">
+        <div>
+            <div class="banner-text-title">Portál technických harmonogramů & WBS plánů</div>
+            <div class="banner-text-sub">Zde nahráváte projektové harmonogramy (Project Plan PDF). Všechny nahrané soubory procházejí automatickou strukturální validační bariérou.</div>
+        </div>
+        <div class="role-notice">
+            🔒 Omezená práva: EVM kalkulace & exporty má k dispozici pouze Projektový manažer.
+        </div>
+    </div>
+
+    <div class="portal-grid">
+        
+        <!-- LEFT: Upload & Pre-Flight Barrier -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <span>Nahrání nového harmonogramu</span>
+                </div>
+                <span class="card-badge" style="background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-border);">Validační bariéra</span>
+            </div>
+
+            <div class="dropzone" id="dropzone">
+                <div class="drop-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </div>
+                <div class="drop-title">Přetáhněte sem soubor 'Project Plan - SYN-*.pdf'</div>
+                <div class="drop-sub">nebo klikněte pro výběr ze složky (max 25 MB)</div>
+                <input type="file" id="fileInput" class="file-input" accept=".pdf,.xlsx">
+            </div>
+
+            <!-- Pre-flight Barrier Result Alert -->
+            <div id="barrierCard" class="barrier-card">
+                <div id="barrierHeader" class="barrier-header">
+                    <span id="barrierIcon"></span>
+                    <span id="barrierTitle"></span>
+                </div>
+                <div id="barrierDesc" style="font-size: 12px; margin-bottom: 6px;"></div>
+                <ul id="barrierList" class="barrier-list"></ul>
+            </div>
+
+            <!-- Demo Pre-flight Simulation Buttons -->
+            <div class="demo-sim-box">
+                <div class="demo-sim-title">Pre-flight simulace bariéry pro demonstraci</div>
+                <div class="sim-btn-row">
+                    <button class="btn-sim" onclick="simulateBarrier('valid')">
+                        ✅ Validní šablona (SYN-26195)
+                    </button>
+                    <button class="btn-sim btn-sim-danger" onclick="simulateBarrier('broken')">
+                        ⛔ Poškozená šablona (Bariéra stop)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Plans Overview from SQL Database -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                    <span>Stav harmonogramů v SQL databázi</span>
+                </div>
+                <span class="db-status-pill">
+                    <span class="live-dot"></span>
+                    <span>SQLite SSOT Připojeno</span>
+                </span>
+            </div>
+
+            <div class="table-toolbar">
+                <div class="search-box">
+                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Hledat projekt..." oninput="filterTable()">
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary);" id="plansCountText">
+                    Načítání projektů...
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Kód projektu</th>
+                            <th>Revize</th>
+                            <th>Fází WBS</th>
+                            <th>Plán hodin</th>
+                            <th>Plnění harmonogramu</th>
+                            <th>Termíny</th>
+                            <th style="text-align: right;">Detail fází</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plansTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                                Načítám data z databáze era_hackathon.db...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<!-- WBS Detail Modal -->
+<div id="wbsModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="modalTitle">Rozpad fází WBS projektu</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="modalSub">26 standardních fází (B0 až A0)</div>
+            </div>
+            <button class="btn-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Fáze</th>
+                        <th>Název etapy</th>
+                        <th>Zahájení</th>
+                        <th>Dokončení</th>
+                        <th>Plán hodin</th>
+                        <th>Plnění %</th>
+                    </tr>
+                </thead>
+                <tbody id="modalTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let allPlans = [];
+let phasesCache = {};
+
+// Load user from storage
+try {
+    const userStr = localStorage.getItem('era_user');
+    if (userStr) {
+        const u = JSON.parse(userStr);
+        if (u.name) document.getElementById('displayUserName').textContent = u.name;
+        if (u.department) document.getElementById('displayUserDept').textContent = u.department;
+    }
+} catch(e){}
+
+// Drag & drop handlers
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter', 'dragover'].forEach(name => {
+    dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); }, false);
+});
+['dragleave', 'drop'].forEach(name => {
+    dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); }, false);
+});
+
+dropzone.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) uploadFile(files[0]);
+});
+
+fileInput.addEventListener('change', (e) => {
+    if (fileInput.files.length > 0) uploadFile(fileInput.files[0]);
+});
+
+async function uploadFile(file) {
+    const barrier = document.getElementById('barrierCard');
+    const bHeader = document.getElementById('barrierHeader');
+    const bTitle = document.getElementById('barrierTitle');
+    const bDesc = document.getElementById('barrierDesc');
+    const bList = document.getElementById('barrierList');
+
+    barrier.style.display = 'block';
+    barrier.className = 'barrier-card';
+    barrier.style.background = '#f1f5f9';
+    barrier.style.borderColor = '#cbd5e1';
+    bTitle.textContent = `Validuji soubor '${file.name}'...`;
+    bDesc.textContent = 'Provádím kontrolu struktury a přítomnosti 26 standardních WBS fází...';
+    bList.innerHTML = '';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const resp = await fetch('/api/validate_upload', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await resp.json();
+        renderBarrierResult(result, file.name);
+    } catch(err) {
+        renderBarrierResult({
+            status: 'REJECTED',
+            errors: ['Chyba spojení s validační službou: ' + err.message]
+        }, file.name);
+    }
+}
+
+function simulateBarrier(type) {
+    if (type === 'valid') {
+        renderBarrierResult({
+            status: 'APPROVED',
+            file_type: 'PROJECT_PLAN',
+            department: 'Technický tým / Harmonogram',
+            errors: [],
+            warnings: [],
+            details: {
+                found_phases_count: 26,
+                has_project_code: true,
+                project_code: 'SYN-26195',
+                revision: 'SYN-PLAN-01'
+            }
+        }, 'Project Plan - SYN-26195.pdf');
+    } else {
+        renderBarrierResult({
+            status: 'REJECTED',
+            file_type: 'CORRUPTED_TEMPLATE',
+            department: 'Neznámá struktura',
+            errors: [
+                'V PDF harmonogramu bylo nalezeno pouze 4 fází z 26 očekávaných (chybí C1–C9, D0, E0...).',
+                'Nebyl nalezen platný kód projektu formátu SYN-XXXXX.',
+                'Struktura neodpovídá šabloně ERA — hrozilo by selhání Python pipeline.'
+            ],
+            warnings: ['Bariéra okamžitě zablokovala nahrání do SQL databáze.'],
+            details: {}
+        }, 'Neznamy_harmonogram_nevalidni.pdf');
+    }
+}
+
+function renderBarrierResult(res, filename) {
+    const barrier = document.getElementById('barrierCard');
+    const bTitle = document.getElementById('barrierTitle');
+    const bDesc = document.getElementById('barrierDesc');
+    const bList = document.getElementById('barrierList');
+
+    barrier.style.display = 'block';
+    bList.innerHTML = '';
+
+    if (res.status === 'APPROVED') {
+        barrier.className = 'barrier-card barrier-approved';
+        bTitle.textContent = `✅ BARIÉRA SCHVÁLILA: ${filename}`;
+        bDesc.textContent = `Struktura souboru odpovídá standardu. Všech 26 WBS fází bylo ověřeno a data jsou uložena v SQL databázi.`;
+        
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>Kód projektu:</strong> ${res.details?.project_code || 'SYN-26195'} | <strong>Revize:</strong> SYN-PLAN-01 | <strong>Fází:</strong> 26/26`;
+        bList.appendChild(li);
+    } else {
+        barrier.className = 'barrier-card barrier-rejected';
+        bTitle.textContent = `⛔ BARIÉRA ZASTAVILA NAHRÁVÁNÍ: ${filename}`;
+        bDesc.textContent = `Soubor byl odmítnut, aby se nerozbila výpočetní logika Pythonu. Opravte soubor podle firemní šablony:`;
+
+        (res.errors || []).forEach(err => {
+            const li = document.createElement('li');
+            li.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span>${err}</span>`;
+            bList.appendChild(li);
+        });
+    }
+}
+
+// Fetch plans from API
+async function loadPlans() {
+    try {
+        const resp = await fetch('/api/technician_plans');
+        const data = await resp.json();
+        allPlans = data.plans || [];
+        phasesCache = data.phases_by_project || {};
+        renderTable(allPlans);
+    } catch(err) {
+        document.getElementById('plansTableBody').innerHTML = `
+            <tr><td colspan="7" style="text-align: center; color: var(--rose); padding: 20px;">
+                Chyba při načítání dat: ${err.message}
+            </td></tr>
+        `;
+    }
+}
+
+function renderTable(plans) {
+    const tbody = document.getElementById('plansTableBody');
+    document.getElementById('plansCountText').textContent = `Celkem v SQL: ${plans.length} projektů`;
+
+    if (!plans.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-muted);">Žádné záznamy nenalezeny.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = plans.map(p => `
+        <tr>
+            <td>
+                <span class="code-pill">${p.project_code}</span>
+            </td>
+            <td style="color: var(--text-secondary); font-size: 11.5px; font-weight: 600;">
+                ${p.revision || 'SYN-PLAN-01'}
+            </td>
+            <td>
+                <span style="font-weight: 700; color: var(--text-heading);">${p.phase_count}</span>
+                <span style="color: var(--text-muted); font-size: 11px;">/ 26 fází</span>
+            </td>
+            <td style="font-weight: 650; font-family: ui-monospace, monospace;">
+                ${(p.total_plan_hours || 0).toLocaleString('cs-CZ')} h
+            </td>
+            <td style="width: 170px;">
+                <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700;">
+                    <span>${p.avg_earned_pct || 0}%</span>
+                    <span style="color: ${p.avg_earned_pct >= 90 ? 'var(--emerald)' : 'var(--amber)'}; font-size: 10.5px;">
+                        ${p.avg_earned_pct >= 90 ? 'Dokončeno' : 'V realizaci'}
+                    </span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${p.avg_earned_pct || 0}%; background: ${p.avg_earned_pct >= 90 ? 'var(--emerald)' : 'var(--amber)'}"></div>
+                </div>
+            </td>
+            <td style="font-size: 11.5px; color: var(--text-secondary);">
+                ${p.project_start || '-'} → ${p.project_end || '-'}
+            </td>
+            <td style="text-align: right;">
+                <button class="btn-detail" onclick="showWBS('${p.project_code}')">
+                    Rozbalit WBS
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function filterTable() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = allPlans.filter(p => 
+        p.project_code.toLowerCase().includes(q) || 
+        (p.revision && p.revision.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function showWBS(projCode) {
+    const modal = document.getElementById('wbsModal');
+    const title = document.getElementById('modalTitle');
+    const sub = document.getElementById('modalSub');
+    const tbody = document.getElementById('modalTableBody');
+
+    title.textContent = `WBS Fáze projektu: ${projCode}`;
+    const phases = phasesCache[projCode] || [];
+    sub.textContent = `${phases.length} standardních fází z tabulky 'project_plan_phases' v SQLite`;
+
+    tbody.innerHTML = phases.map(ph => `
+        <tr>
+            <td><span class="code-pill">${ph.phase_code}</span></td>
+            <td style="font-weight: 600;">${ph.phase_name}</td>
+            <td style="font-size: 11.5px; color: var(--text-secondary);">${ph.start_date || '-'}</td>
+            <td style="font-size: 11.5px; color: var(--text-secondary);">${ph.finish_date || '-'}</td>
+            <td style="font-family: ui-monospace, monospace;">${ph.hours ? ph.hours + ' h' : '-'}</td>
+            <td>
+                <span style="font-weight: 750; color: ${ph.earned_pct >= 100 ? 'var(--emerald)' : 'var(--blue)'};">
+                    ${ph.earned_pct !== null ? ph.earned_pct + '%' : '-'}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+
+    modal.style.display = 'flex';
+}
+
+function closeModal(e) {
+    document.getElementById('wbsModal').style.display = 'none';
+}
+
+// Initial load
+loadPlans();
+</script>
+
+</body>
+</html>
